@@ -29,6 +29,7 @@
 
 (defn candidate-map
   [seed input lvl]
+  ;(do-candidate-map seed input lvl)
   (if (<= lvl 6)
     (memo-candidate-map seed input lvl)
     (do-candidate-map seed input lvl)))
@@ -40,27 +41,25 @@
     (str (subs seed 1) newchar)))
 
 (defn initial-seed
-  [input lvl ^Random rand]
+  [input lvl rand]
   (if (= 0 lvl)
     ""
     (let [start (.nextInt rand (- (count input) lvl))]
       (subs input start (+ start lvl)))))
 
 (defn random-writer
-  [input lvl length]
+  [input lvl length rand]
   (when (>= lvl (count input))
      (throw (IllegalArgumentException. "Level cannot be greater than input size")))
-  (loop [output []
-        ctr 0
-        rand (Random.)
+  (loop [output (transient [])
         seed (initial-seed input lvl rand)]
-    (if (= ctr length)
+    (if (= (count output) length)
       (apply str output)
       (if-let [c (weighted-select (candidate-map seed input lvl) rand)]
-        (recur (conj output c) (inc ctr) rand (rotate-seed seed c))
-        (recur (conj output \u0000) (inc ctr) rand (initial-seed input lvl rand))))))
+        (recur (conj! output c) (rotate-seed seed c))
+        (recur (conj! output \u0000) (initial-seed input lvl rand))))))
 
 (defn -main
   [in out level length & args]
-  (spit out (random-writer (slurp in) (Integer/parseInt level) (Integer/parseInt length))))
+  (spit out (random-writer (slurp in) (Long/parseLong level) (Long/parseLong length) (Random.))))
 

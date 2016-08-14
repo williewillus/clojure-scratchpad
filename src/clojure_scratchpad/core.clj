@@ -4,7 +4,7 @@
            (java.util.regex Pattern)))
 
 (defn do-weighted-select
-  ([m rand]
+  ([m ^Random rand]
    (let [weights (zipmap (keys m) (reductions + (vals m))) ; TODO Not guaranteed to be ordered!
          sel (.nextInt rand (second (last weights)))]
      (key (first (drop-while #(<= (val %) sel) weights))))))
@@ -29,7 +29,6 @@
 
 (defn candidate-map
   [seed input lvl]
-  ;(do-candidate-map seed input lvl)
   (if (<= lvl 6)
     (memo-candidate-map seed input lvl)
     (do-candidate-map seed input lvl)))
@@ -41,7 +40,7 @@
     (str (subs seed 1) newchar)))
 
 (defn initial-seed
-  [input lvl rand]
+  [input lvl ^Random rand]
   (if (= 0 lvl)
     ""
     (let [start (.nextInt rand (- (count input) lvl))]
@@ -54,7 +53,7 @@
   (loop [output (transient [])
         seed (initial-seed input lvl rand)]
     (if (= (count output) length)
-      (apply str output)
+      (apply str (persistent! output))
       (if-let [c (weighted-select (candidate-map seed input lvl) rand)]
         (recur (conj! output c) (rotate-seed seed c))
         (recur (conj! output \u0000) (initial-seed input lvl rand))))))

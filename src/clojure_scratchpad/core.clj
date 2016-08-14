@@ -3,17 +3,13 @@
   (:import (java.util Random)
            (java.util.regex Pattern)))
 
-(defn do-weighted-select
-  ([m ^Random rand]
-   (let [weights (zipmap (keys m) (reductions + (vals m))) ; TODO Not guaranteed to be ordered!
-         sel (.nextInt rand (second (last weights)))]
-     (key (first (drop-while #(<= (val %) sel) weights))))))
-
 (defn weighted-select
-  [m rand]
-  (if-not (seq m)
-    nil
-    (do-weighted-select (filter #(> (val %) 0) m) rand)))
+  ([m ^Random rand]
+   (if-not (seq m)
+     nil
+     (let [weights (zipmap (keys m) (reductions + (vals m))) ; TODO Not guaranteed to be ordered!
+           sel (.nextInt rand (second (last weights)))]
+       (key (first (drop-while #(<= (val %) sel) weights)))))))
 
 (defn do-candidate-map
   [seed input lvl]

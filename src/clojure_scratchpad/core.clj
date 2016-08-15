@@ -1,7 +1,8 @@
 (ns clojure-scratchpad.core
   (:gen-class)
   (:import (java.util Random)
-           (java.util.regex Pattern)))
+           (java.util.regex Pattern))
+  (:require [clojure.string :as str]))
 
 (defn weighted-select
   ([m ^Random rand]
@@ -15,8 +16,8 @@
   [seed input lvl]
   (if (= 0 lvl)
     (frequencies (drop 1 input))
-    (->> (re-seq (re-pattern (str (Pattern/quote seed) "(.)")) input)
-         (map second)
+    (->> (drop (if (str/starts-with? input seed) 0 1)
+               (str/split input (re-pattern (Pattern/quote seed))))
          (filter not-empty)
          (map first)
          (frequencies))))

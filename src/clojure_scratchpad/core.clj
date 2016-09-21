@@ -58,4 +58,3 @@
 (defn -main
   [in out level length & args]
   (spit out (random-writer (slurp in) (Long/parseLong level) (Long/parseLong length) (Random.))))
-

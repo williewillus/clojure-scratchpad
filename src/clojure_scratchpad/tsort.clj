@@ -22,4 +22,5 @@
             to-add (filter #(empty? (dependents new-graph %)) dependencies)]
         (recur new-graph (conj result n) (apply conj (pop s) to-add)))
       (if (every? empty? (vals wg))
-        result :cycle))))
+        result
+        (throw (IllegalArgumentException. "Detected cycle in graph"))))))
